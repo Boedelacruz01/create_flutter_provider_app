@@ -27,8 +27,9 @@ class SettingScreen extends StatelessWidget {
           subtitle: Text(AppLocalizations.of(context)
               .translate("settingThemeListSubTitle")),
           trailing: Switch(
-            activeColor: Theme.of(context).appBarTheme.color,
-            activeTrackColor: Theme.of(context).textTheme.title!.color,
+            activeColor:
+                Theme.of(context).appBarTheme.backgroundColor ?? Colors.grey,
+            activeTrackColor: Theme.of(context).textTheme.headlineMedium?.color,
             value: Provider.of<ThemeProvider>(context).isDarkModeOn,
             onChanged: (booleanValue) {
               Provider.of<ThemeProvider>(context, listen: false)
@@ -48,48 +49,51 @@ class SettingScreen extends StatelessWidget {
               AppLocalizations.of(context).translate("settingLogoutListTitle")),
           subtitle: Text(AppLocalizations.of(context)
               .translate("settingLogoutListSubTitle")),
-          trailing: RaisedButton(
-              onPressed: () {
-                _confirmSignOut(context);
-              },
-              child: Text(AppLocalizations.of(context)
-                  .translate("settingLogoutButton"))),
-        )
+          trailing: ElevatedButton(
+            onPressed: () {
+              _confirmSignOut(context);
+            },
+            child: Text(
+                AppLocalizations.of(context).translate("settingLogoutButton")),
+          ),
+        ),
       ],
     );
   }
 
   _confirmSignOut(BuildContext context) {
     showPlatformDialog(
-        context: context,
-        builder: (_) => PlatformAlertDialog(
-              material: (_, PlatformTarget target) => MaterialAlertDialogData(
-                  backgroundColor: Theme.of(context).appBarTheme.color),
-              title: Text(
-                  AppLocalizations.of(context).translate("alertDialogTitle")),
-              content: Text(
-                  AppLocalizations.of(context).translate("alertDialogMessage")),
-              actions: <Widget>[
-                PlatformDialogAction(
-                  child: PlatformText(AppLocalizations.of(context)
-                      .translate("alertDialogCancelBtn")),
-                  onPressed: () => Navigator.pop(context),
-                ),
-                PlatformDialogAction(
-                  child: PlatformText(AppLocalizations.of(context)
-                      .translate("alertDialogYesBtn")),
-                  onPressed: () {
-                    final authProvider =
-                        Provider.of<AuthProvider>(context, listen: false);
+      context: context,
+      builder: (_) => PlatformAlertDialog(
+        material: (_, __) => MaterialAlertDialogData(
+          backgroundColor:
+              Theme.of(context).appBarTheme.backgroundColor ?? Colors.white,
+        ),
+        title: Text(AppLocalizations.of(context).translate("alertDialogTitle")),
+        content:
+            Text(AppLocalizations.of(context).translate("alertDialogMessage")),
+        actions: <Widget>[
+          PlatformDialogAction(
+            child: PlatformText(
+                AppLocalizations.of(context).translate("alertDialogCancelBtn")),
+            onPressed: () => Navigator.pop(context),
+          ),
+          PlatformDialogAction(
+            child: PlatformText(
+                AppLocalizations.of(context).translate("alertDialogYesBtn")),
+            onPressed: () {
+              final authProvider =
+                  Provider.of<AuthProvider>(context, listen: false);
 
-                    authProvider.signOut();
+              authProvider.signOut();
 
-                    Navigator.pop(context);
-                    Navigator.of(context).pushNamedAndRemoveUntil(
-                        Routes.login, ModalRoute.withName(Routes.login));
-                  },
-                )
-              ],
-            ));
+              Navigator.pop(context);
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                  Routes.login, ModalRoute.withName(Routes.login));
+            },
+          ),
+        ],
+      ),
+    );
   }
 }

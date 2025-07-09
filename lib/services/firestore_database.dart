@@ -21,7 +21,7 @@ changed to true.
 
  */
 class FirestoreDatabase {
-  FirestoreDatabase({required this.uid}) : assert(uid != null);
+  FirestoreDatabase({required this.uid});
   final String uid;
 
   final _firestoreService = FirestoreService.instance;

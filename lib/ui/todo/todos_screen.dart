@@ -24,12 +24,12 @@ class TodosScreen extends StatelessWidget {
         title: StreamBuilder(
             stream: authProvider.user,
             builder: (context, snapshot) {
-              final UserModel? user = snapshot.data as UserModel?;
-              return Text(user != null
-                  ? user.email! +
-                      " - " +
-                      AppLocalizations.of(context).translate("homeAppBarTitle")
-                  : AppLocalizations.of(context).translate("homeAppBarTitle"));
+              final UserModel? user = snapshot.data;
+              return Text(
+                user != null && user.email != null
+                    ? "${user.email} - ${AppLocalizations.of(context).translate("homeAppBarTitle")}"
+                    : AppLocalizations.of(context).translate("homeAppBarTitle"),
+              );
             }),
         actions: <Widget>[
           StreamBuilder(
@@ -41,10 +41,7 @@ class TodosScreen extends StatelessWidget {
                       visible: todos.isNotEmpty ? true : false,
                       child: TodosExtraActions());
                 } else {
-                  return Container(
-                    width: 0,
-                    height: 0,
-                  );
+                  return Container(width: 0, height: 0);
                 }
               }),
           IconButton(
@@ -57,19 +54,20 @@ class TodosScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         onPressed: () {
-          Navigator.of(context).pushNamed(
-            Routes.create_edit_todo,
-          );
+          Navigator.of(context).pushNamed(Routes.create_edit_todo);
         },
       ),
-      body: WillPopScope(
-          onWillPop: () async => false, child: _buildBodySection(context)),
+      body: PopScope(
+        canPop: false,
+        child: _buildBodySection(context),
+      ),
     );
   }
 
   Widget _buildBodySection(BuildContext context) {
     final firestoreDatabase =
         Provider.of<FirestoreDatabase>(context, listen: false);
+    final onSurfaceColor = Theme.of(context).colorScheme.onSurface;
 
     return StreamBuilder(
         stream: firestoreDatabase.todosStream(),
@@ -84,30 +82,31 @@ class TodosScreen extends StatelessWidget {
                     background: Container(
                       color: Colors.red,
                       child: Center(
-                          child: Text(
-                        AppLocalizations.of(context)
-                            .translate("todosDismissibleMsgTxt"),
-                        style: TextStyle(color: Theme.of(context).canvasColor),
-                      )),
+                        child: Text(
+                          AppLocalizations.of(context)
+                              .translate("todosDismissibleMsgTxt"),
+                          style: TextStyle(color: onSurfaceColor),
+                        ),
+                      ),
                     ),
                     key: Key(todos[index].id),
                     onDismissed: (direction) {
                       firestoreDatabase.deleteTodo(todos[index]);
 
-                      _scaffoldKey.currentState!.showSnackBar(SnackBar(
-                        backgroundColor: Theme.of(context).appBarTheme.color,
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        backgroundColor:
+                            Theme.of(context).appBarTheme.backgroundColor,
                         content: Text(
                           AppLocalizations.of(context)
                                   .translate("todosSnackBarContent") +
                               todos[index].task,
-                          style:
-                              TextStyle(color: Theme.of(context).canvasColor),
+                          style: TextStyle(color: onSurfaceColor),
                         ),
                         duration: Duration(seconds: 3),
                         action: SnackBarAction(
                           label: AppLocalizations.of(context)
                               .translate("todosSnackBarActionLbl"),
-                          textColor: Theme.of(context).canvasColor,
+                          textColor: onSurfaceColor,
                           onPressed: () {
                             firestoreDatabase.setTodo(todos[index]);
                           },
@@ -127,8 +126,10 @@ class TodosScreen extends StatelessWidget {
                           }),
                       title: Text(todos[index].task),
                       onTap: () {
-                        Navigator.of(context).pushNamed(Routes.create_edit_todo,
-                            arguments: todos[index]);
+                        Navigator.of(context).pushNamed(
+                          Routes.create_edit_todo,
+                          arguments: todos[index],
+                        );
                       },
                     ),
                   );
